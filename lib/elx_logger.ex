@@ -1,18 +1,17 @@
 defmodule ElxLogger do
-  @moduledoc """
-  Documentation for `ElxLogger`.
-  """
 
-  @doc """
-  Hello world.
+  def listen do
+    receive do
+      {:debug, message} -> IO.puts(message)
+      {:error, message} -> IO.puts(message)
+      {:info, message} -> IO.puts(message)
+      {:trace, message} -> IO.puts(message)
+      {:warn, message} -> IO.puts(message)
+    end
+  end
 
-  ## Examples
-
-      iex> ElxLogger.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def make(log_type, message) do
+    pid = spawn(ElxLogger, :listen, [])
+    send pid, {String.to_atom(log_type), message}
   end
 end

@@ -2,7 +2,7 @@ defmodule ElxLoggerTest do
   use ExUnit.Case
   doctest ElxLogger
 
-  test "greets the world" do
-    assert ElxLogger.hello() == :world
+  test "make log" do
+    assert ElxLogger.make("error", "Sample Error") == {:error, "Sample Error"}
   end
 end
