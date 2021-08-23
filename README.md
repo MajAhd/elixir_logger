@@ -1,17 +1,21 @@
 # ElxLogger
 
-Simple and easy library to Log 
+Simple and easy to Log with RabbitMq
 
-⚠️ Library under develop
+⚠️ under develop
 
+## Logic
 
-## Installation
+- Get Logs via rabbitMq
+- Save Logs via : file , database
+- publish log via email
 
-```elixir
-def deps do
-  [
-    {:elx_logger, "~> 0.1.0"}
-  ]
-end
-```
- 
+## instalation
+
+- RabbitMq
+- PostgreSQL
+
+## Scripts
+
+- mix deps.get
+- iex -S mix

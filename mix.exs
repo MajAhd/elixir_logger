@@ -6,18 +6,19 @@ defmodule ElxLogger.MixProject do
       app: :elx_logger,
       version: "0.1.0",
       elixir: "~> 1.11",
-      build_embedded: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
-      deps: deps(),
+      deps: deps()
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :amqp],
+      mod: {ElxLogger, []}
     ]
   end
 
@@ -25,7 +26,8 @@ defmodule ElxLogger.MixProject do
   defp deps do
     [
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:amqp, "~> 1.0"}
     ]
   end
 
@@ -37,7 +39,7 @@ defmodule ElxLogger.MixProject do
 
   defp package do
     [
-      files: ["lib", "mix.exs", "README*", "LICENSE*" ,"CHANGELOG*"],
+      files: ["lib", "mix.exs", "README*", "LICENSE*", "CHANGELOG*"],
       maintainers: ["Majid Ahmaditabar"],
       licenses: ["MIT"],
       links: %{

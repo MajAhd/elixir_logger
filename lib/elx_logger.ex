@@ -1,4 +1,9 @@
 defmodule ElxLogger do
+  use Application
+
+  def start(_types, _args) do
+    ElxLogger.Supervisor.start_link()
+  end
 
   def listen do
     receive do
@@ -12,6 +17,6 @@ defmodule ElxLogger do
 
   def make(log_type, message) do
     pid = spawn(ElxLogger, :listen, [])
-    send pid, {String.to_atom(log_type), message}
+    send(pid, {String.to_atom(log_type), message})
   end
 end

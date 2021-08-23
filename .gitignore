@@ -9,11 +9,11 @@ erl_crash.dump
 *.beam
 /config/*.secret.exs
 .elixir_ls/
-
-
+mix.lock
+log/
 /.idea
 .idea
-
+Logger.md
 .DS_Store
 .env.local
 .env.development.local
