@@ -8,7 +8,7 @@ defmodule ElxLogger.Supervisor do
 
   def init(_) do
     children = [
-      {ElxLogger.Server, []},
+      # {ElxLogger.Server, []},
       {ElxLogger.DebugConsumer, []},
       {ElxLogger.ErrorConsumer, []},
       {ElxLogger.InfoConsumer, []},

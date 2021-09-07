@@ -47,9 +47,7 @@ defmodule ElxLogger.InfoConsumer do
 
   defp consume(payload) do
     try do
-      {:ok, file} = File.read("info.txt")
-      IO.puts(payload)
-      File.write("info.txt", "#{payload}\n#{file}")
+      ElxLogger.File.info_file_log(payload)
     rescue
       _ ->
         IO.puts("InfoConsumer did not completed at #{DateTime.utc_now()}")

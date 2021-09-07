@@ -37,16 +37,17 @@ defmodule ElxLogger.ErrorConsumer do
     {:noreply, chan}
   end
 
-  def handle_info({:basic_deliver, payload, %{delivery_tag: _tag, redelivered: _redelivered}}, chan) do
+  def handle_info(
+        {:basic_deliver, payload, %{delivery_tag: _tag, redelivered: _redelivered}},
+        chan
+      ) do
     spawn(fn -> consume(payload) end)
     {:noreply, chan}
   end
 
   defp consume(payload) do
     try do
-      {:ok, file} = File.read("error.txt")
-      IO.puts(payload)
-      File.write("error.txt", "#{payload}\n#{file}")
+      ElxLogger.File.error_file_log(payload)
     rescue
       _ ->
         IO.puts("ErrorConsumer did not completed at #{DateTime.utc_now()}")
