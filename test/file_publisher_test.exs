@@ -1,4 +1,4 @@
-defmodule ElxValidation.BooleanTest do
+defmodule ElxValidation.FilePublisherTest do
   use ExUnit.Case
   doctest ElxLogger.File
 

@@ -13,7 +13,8 @@ defmodule ElxLogger.Supervisor do
       {ElxLogger.ErrorConsumer, []},
       {ElxLogger.InfoConsumer, []},
       {ElxLogger.TraceConsumer, []},
-      {ElxLogger.WarnConsumer, []}
+      {ElxLogger.WarnConsumer, []},
+      {ElxLogger.Repo, []}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

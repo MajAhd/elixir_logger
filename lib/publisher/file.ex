@@ -17,8 +17,8 @@ defmodule ElxLogger.File do
     end
   end
 
-  def save_log(add, log) do
-    {:ok, file} = File.read(add)
-    File.write(add, "#{log}\n#{file}")
+  def save_log(address, log) do
+    {:ok, file} = File.read(address)
+    File.write(address, "#{log}\n#{file}")
   end
 end

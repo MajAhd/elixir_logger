@@ -50,6 +50,9 @@ defmodule ElxLogger.DebugConsumer do
       if payload.file == "true" do
         spawn(fn -> ElxLogger.File.file_factory(:debug, payload.msg) end)
       end
+      if payload.db == "true" do
+        spawn(fn -> ElxLogger.Database.save_to_db(:debug, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("DebugConsumer did not completed at #{DateTime.utc_now()}")

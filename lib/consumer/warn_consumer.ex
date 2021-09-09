@@ -50,6 +50,10 @@ defmodule ElxLogger.WarnConsumer do
       if payload.file == "true" do
         spawn(fn -> ElxLogger.File.file_factory(:warning, payload.msg) end)
       end
+
+      if payload.db == "true" do
+        spawn(fn -> ElxLogger.Database.save_to_db(:warning, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("WarnConsumer did not completed at #{DateTime.utc_now()}")

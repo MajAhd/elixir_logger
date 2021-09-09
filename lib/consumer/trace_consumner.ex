@@ -47,8 +47,12 @@ defmodule ElxLogger.TraceConsumer do
 
   defp consume(payload) do
     try do
-       if payload.file == "true" do
+      if payload.file == "true" do
         spawn(fn -> ElxLogger.File.file_factory(:trace, payload.msg) end)
+      end
+
+      if payload.db == "true" do
+        spawn(fn -> ElxLogger.Database.save_to_db(:trace, payload.msg) end)
       end
     rescue
       _ ->

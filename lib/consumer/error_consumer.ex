@@ -52,7 +52,7 @@ defmodule ElxLogger.ErrorConsumer do
       end
 
       if payload.db == "true" do
-        IO.puts("#{payload.msg} Save in DB")
+        spawn(fn -> ElxLogger.Database.save_to_db(:error, payload.msg) end)
       end
 
       if payload.email == "true" do
