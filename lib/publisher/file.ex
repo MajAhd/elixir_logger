@@ -6,28 +6,19 @@ defmodule ElxLogger.File do
   @debug_path Path.join(:code.priv_dir(:elx_logger), "debug.log")
   @moduledoc false
 
-  def error_file_log(log) do
-    {:ok, file} = File.read(@error_path)
-    File.write(@error_path, "#{log}\n#{file}")
+  def file_factory(type, log) do
+    cond do
+      type == :error -> save_log(@error_path, log)
+      type == :warning -> save_log(@warning_path, log)
+      type == :info -> save_log(@info_path, log)
+      type == :trace -> save_log(@trace_path, log)
+      type == :debug -> save_log(@debug_path, log)
+      true -> IO.puts("Log type is not valid")
+    end
   end
 
-  def warning_file_log(log) do
-    {:ok, file} = File.read(@warning_path)
-    File.write(@warning_path, "#{log}\n#{file}")
-  end
-
-  def info_file_log(log) do
-    {:ok, file} = File.read(@info_path)
-    File.write(@info_path, "#{log}\n#{file}")
-  end
-
-  def trace_file_log(log) do
-    {:ok, file} = File.read(@trace_path)
-    File.write(@trace_path, "#{log}\n#{file}")
-  end
-
-  def debug_file_log(log) do
-    {:ok, file} = File.read(@debug_path)
-    File.write(@debug_path, "#{log}\n#{file}")
+  def save_log(add, log) do
+    {:ok, file} = File.read(add)
+    File.write(add, "#{log}\n#{file}")
   end
 end

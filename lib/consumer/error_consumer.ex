@@ -47,7 +47,17 @@ defmodule ElxLogger.ErrorConsumer do
 
   defp consume(payload) do
     try do
-      ElxLogger.File.error_file_log(payload)
+      if payload.file == "true" do
+        spawn(fn -> ElxLogger.File.file_factory(:error, payload.msg) end)
+      end
+
+      if payload.db == "true" do
+        IO.puts("#{payload.msg} Save in DB")
+      end
+
+      if payload.email == "true" do
+        IO.puts("#{payload.msg} Email Log")
+      end
     rescue
       _ ->
         IO.puts("ErrorConsumer did not completed at #{DateTime.utc_now()}")

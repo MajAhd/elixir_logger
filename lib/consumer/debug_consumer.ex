@@ -47,7 +47,9 @@ defmodule ElxLogger.DebugConsumer do
 
   defp consume(payload) do
     try do
-      ElxLogger.File.debug_file_log(payload)
+      if payload.file == "true" do
+        spawn(fn -> ElxLogger.File.file_factory(:debug, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("DebugConsumer did not completed at #{DateTime.utc_now()}")

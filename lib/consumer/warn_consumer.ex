@@ -47,7 +47,9 @@ defmodule ElxLogger.WarnConsumer do
 
   defp consume(payload) do
     try do
-      ElxLogger.File.warning_file_log(payload)
+      if payload.file == "true" do
+        spawn(fn -> ElxLogger.File.file_factory(:warning, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("WarnConsumer did not completed at #{DateTime.utc_now()}")

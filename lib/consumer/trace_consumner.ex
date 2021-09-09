@@ -47,7 +47,9 @@ defmodule ElxLogger.TraceConsumer do
 
   defp consume(payload) do
     try do
-      ElxLogger.File.trace_file_log(payload)
+       if payload.file == "true" do
+        spawn(fn -> ElxLogger.File.file_factory(:trace, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("TraceConsumer did not completed at #{DateTime.utc_now()}")

@@ -47,7 +47,9 @@ defmodule ElxLogger.InfoConsumer do
 
   defp consume(payload) do
     try do
-      ElxLogger.File.info_file_log(payload)
+      if payload.file == "true" do
+        spawn(fn -> ElxLogger.File.file_factory(:info, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("InfoConsumer did not completed at #{DateTime.utc_now()}")
