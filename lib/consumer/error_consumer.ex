@@ -56,7 +56,7 @@ defmodule ElxLogger.ErrorConsumer do
       end
 
       if payload.email == "true" do
-        IO.puts("#{payload.msg} Email Log")
+        spawn(fn -> ElxLogger.Mail.send_log(:error, payload.reciever, payload.msg) end)
       end
     rescue
       _ ->

@@ -50,8 +50,13 @@ defmodule ElxLogger.InfoConsumer do
       if payload.file == "true" do
         spawn(fn -> ElxLogger.File.file_factory(:info, payload.msg) end)
       end
+
       if payload.db == "true" do
         spawn(fn -> ElxLogger.Database.save_to_db(:info, payload.msg) end)
+      end
+
+      if payload.email == "true" do
+        spawn(fn -> ElxLogger.Mail.send_log(:info, payload.reciever, payload.msg) end)
       end
     rescue
       _ ->

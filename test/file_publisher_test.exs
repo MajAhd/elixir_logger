@@ -2,7 +2,7 @@ defmodule ElxValidation.FilePublisherTest do
   use ExUnit.Case
   doctest ElxLogger.File
 
-  test "error file logger" do
+  test "file logs publisher" do
     assert ElxLogger.File.file_factory(:error, "Test Error Logger") == :ok
     assert ElxLogger.File.file_factory(:warning, "Test Warning Logger") == :ok
     assert ElxLogger.File.file_factory(:debug, "Test Debug Logger") == :ok

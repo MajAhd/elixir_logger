@@ -2,7 +2,7 @@ defmodule ElxValidation.DatabasePublisherTest do
   use ExUnit.Case
   doctest ElxLogger.Database
 
-  test "error file logger" do
+  test "database logs Publisher" do
     assert ElxLogger.Database.save_to_db(:error, "Test Error Logger") == :ok
     assert ElxLogger.Database.save_to_db(:warning, "Test Warning Logger") == :ok
     assert ElxLogger.Database.save_to_db(:debug, "Test Debug Logger") == :ok

@@ -54,6 +54,10 @@ defmodule ElxLogger.TraceConsumer do
       if payload.db == "true" do
         spawn(fn -> ElxLogger.Database.save_to_db(:trace, payload.msg) end)
       end
+
+      if payload.email == "true" do
+        spawn(fn -> ElxLogger.Mail.send_log(:trace, payload.reciever, payload.msg) end)
+      end
     rescue
       _ ->
         IO.puts("TraceConsumer did not completed at #{DateTime.utc_now()}")
