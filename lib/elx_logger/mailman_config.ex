@@ -2,12 +2,12 @@ defmodule ElxLogger.MailmanConfig do
   def context do
     %Mailman.Context{
       config: %Mailman.SmtpConfig{
-        relay: "smtp.YOUR-DOMAIN.com",
-        username: "USER-NAME@domain.com",
-        password: "YOUR PASSWORD",
-        port: 587,
-        tls: :always,
-        auth: :always
+        relay: Application.fetch_env!(:elx_logger, :relay),
+        username: Application.fetch_env!(:elx_logger, :username),
+        password: Application.fetch_env!(:elx_logger, :password),
+        port: Application.fetch_env!(:elx_logger, :port),
+        tls: Application.fetch_env!(:elx_logger, :tls),
+        auth: Application.fetch_env!(:elx_logger, :auth)
       },
       composer: %Mailman.EexComposeConfig{}
     }

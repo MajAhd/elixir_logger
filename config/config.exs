@@ -7,3 +7,11 @@ config :elx_logger, ElxLogger.Repo,
   hostname: "127.0.0.1"
 
 config :elx_logger, ecto_repos: [ElxLogger.Repo]
+
+config :elx_logger,
+  relay: "smtp.YOUR-DOMAIN.com",
+  username: "USERNAME@DOMAIN.com",
+  password: "PASSWORD",
+  port: 587,
+  tls: :always,
+  auth: :always

@@ -1,9 +1,9 @@
 defmodule ElxLogger.File do
-  @error_path Path.join(:code.priv_dir(:elx_logger), "error.log")
-  @warning_path Path.join(:code.priv_dir(:elx_logger), "warning.log")
-  @info_path Path.join(:code.priv_dir(:elx_logger), "info.log")
-  @trace_path Path.join(:code.priv_dir(:elx_logger), "trace.log")
-  @debug_path Path.join(:code.priv_dir(:elx_logger), "debug.log")
+  @error_path Path.join(:code.priv_dir(:elx_logger), "log_files/error.log")
+  @warning_path Path.join(:code.priv_dir(:elx_logger), "log_files/warning.log")
+  @info_path Path.join(:code.priv_dir(:elx_logger), "log_files/info.log")
+  @trace_path Path.join(:code.priv_dir(:elx_logger), "log_files/trace.log")
+  @debug_path Path.join(:code.priv_dir(:elx_logger), "log_files/debug.log")
   @moduledoc false
 
   def file_factory(type, log) do
