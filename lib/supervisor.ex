@@ -15,7 +15,6 @@ defmodule ElxLogger.Supervisor do
       {ElxLogger.TraceConsumer, []},
       {ElxLogger.WarnConsumer, []},
       {ElxLogger.Repo, []}
-      
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

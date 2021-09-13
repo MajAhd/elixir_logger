@@ -27,6 +27,7 @@ defmodule ElxLogger.MixProject do
     [
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:jason, "~> 1.2"},
       {:amqp, "~> 1.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},

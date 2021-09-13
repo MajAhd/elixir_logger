@@ -9,6 +9,7 @@ config :elx_logger, ElxLogger.Repo,
 config :elx_logger, ecto_repos: [ElxLogger.Repo]
 
 config :elx_logger,
+  logs_reciver: "example@example.com",
   relay: "smtp.YOUR-DOMAIN.com",
   username: "USERNAME@DOMAIN.com",
   password: "PASSWORD",

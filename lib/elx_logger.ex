@@ -7,16 +7,19 @@ defmodule ElxLogger do
 
   def listen do
     receive do
-      {:debug, message} -> IO.puts(message)
-      {:error, message} -> IO.puts(message)
-      {:info, message} -> IO.puts(message)
-      {:trace, message} -> IO.puts(message)
-      {:warn, message} -> IO.puts(message)
+      {:file, log_type, message} ->
+        spawn(fn -> ElxLogger.File.file_factory(log_type, message) end)
+
+      {:db, log_type, message} ->
+        spawn(fn -> ElxLogger.Database.save_to_db(log_type, message) end)
+
+      {:mail, log_type, message} ->
+        spawn(fn -> ElxLogger.Mail.send_log(log_type, message) end)
     end
   end
 
-  def make(log_type, message) do
+  def make(action, log_type, message) do
     pid = spawn(ElxLogger, :listen, [])
-    send(pid, {String.to_atom(log_type), message})
+    send(pid, {action, log_type, message})
   end
 end

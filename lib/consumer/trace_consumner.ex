@@ -6,7 +6,7 @@ defmodule ElxLogger.TraceConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange "gen_server_test_exchange"
+  @exchange "trace_logs_exchange"
   @queue "trace"
   # @queue_error "#{@queue}_error"
 
@@ -15,10 +15,9 @@ defmodule ElxLogger.TraceConsumer do
     {:ok, chan} = AMQP.Channel.open(conn)
 
     AMQP.Queue.declare(chan, @queue, durable: true)
-
-    AMQP.Exchange.fanout(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange)
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue)
+    AMQP.Exchange.topic(chan, @exchange, durable: true)
+    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "trace.*")
+    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -38,29 +37,26 @@ defmodule ElxLogger.TraceConsumer do
   end
 
   def handle_info(
-        {:basic_deliver, payload, %{delivery_tag: _tag, redelivered: _redelivered}},
+        {:basic_deliver, payload,
+         %{routing_key: routing_key, delivery_tag: _tag, redelivered: _redelivered}},
         chan
       ) do
-    spawn(fn -> consume(payload) end)
+    spawn(fn -> consume(payload, routing_key) end)
     {:noreply, chan}
   end
 
-  defp consume(payload) do
+  defp consume(payload, action) do
     try do
-      if payload.file == "true" do
-        spawn(fn -> ElxLogger.File.file_factory(:trace, payload.msg) end)
-      end
+      IO.puts("action: #{action} log: #{payload}")
 
-      if payload.db == "true" do
-        spawn(fn -> ElxLogger.Database.save_to_db(:trace, payload.msg) end)
-      end
-
-      if payload.email == "true" do
-        spawn(fn -> ElxLogger.Mail.send_log(:trace, payload.reciever, payload.msg) end)
+      cond do
+        action == "trace.db" -> ElxLogger.make(:db, :trace, payload)
+        action == "trace.file" -> ElxLogger.make(:file, :trace, payload)
+        action == "trace.mail" -> ElxLogger.make(:mail, :trace, payload)
       end
     rescue
       _ ->
-        IO.puts("TraceConsumer did not completed at #{DateTime.utc_now()}")
+        IO.puts("Trace Consumer did not completed")
     end
   end
 end

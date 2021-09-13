@@ -6,19 +6,17 @@ defmodule ElxLogger.DebugConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange "gen_server_test_exchange"
+  @exchange "debug_logs_exchange"
   @queue "debug"
-  # @queue_error "#{@queue}_error"
 
   def init(_opts) do
     {:ok, conn} = AMQP.Connection.open()
     {:ok, chan} = AMQP.Channel.open(conn)
 
     AMQP.Queue.declare(chan, @queue, durable: true)
-
-    AMQP.Exchange.fanout(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange)
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue)
+    AMQP.Exchange.topic(chan, @exchange, durable: true)
+    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "debug.*")
+    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -38,29 +36,26 @@ defmodule ElxLogger.DebugConsumer do
   end
 
   def handle_info(
-        {:basic_deliver, payload, %{delivery_tag: _tag, redelivered: _redelivered}},
+        {:basic_deliver, payload,
+         %{routing_key: routing_key, delivery_tag: _tag, redelivered: _redelivered}},
         chan
       ) do
-    spawn(fn -> consume(payload) end)
+    spawn(fn -> consume(payload, routing_key) end)
     {:noreply, chan}
   end
 
-  defp consume(payload) do
+  defp consume(payload, action) do
     try do
-      if payload.file == "true" do
-        spawn(fn -> ElxLogger.File.file_factory(:debug, payload.msg) end)
-      end
+      IO.puts("action: #{action} log: #{payload}")
 
-      if payload.db == "true" do
-        spawn(fn -> ElxLogger.Database.save_to_db(:debug, payload.msg) end)
-      end
-
-      if payload.email == "true" do
-        spawn(fn -> ElxLogger.Mail.send_log(:debug, payload.reciever, payload.msg) end)
+      cond do
+        action == "debug.db" -> ElxLogger.make(:db, :debug, payload)
+        action == "debug.file" -> ElxLogger.make(:file, :debug, payload)
+        action == "debug.mail" -> ElxLogger.make(:mail, :debug, payload)
       end
     rescue
       _ ->
-        IO.puts("DebugConsumer did not completed at #{DateTime.utc_now()}")
+        IO.puts("Debug Consumer did not completed")
     end
   end
 end

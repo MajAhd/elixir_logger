@@ -6,7 +6,7 @@ defmodule ElxLogger.ErrorConsumer do
     GenServer.start_link(__MODULE__, arg, name: :elx_logger)
   end
 
-  @exchange "gen_server_test_exchange"
+  @exchange "error_logs_exchange"
   @queue "error"
   # @queue_error "#{@queue}_error"
 
@@ -15,10 +15,9 @@ defmodule ElxLogger.ErrorConsumer do
     {:ok, chan} = AMQP.Channel.open(conn)
 
     AMQP.Queue.declare(chan, @queue, durable: true)
-
-    AMQP.Exchange.fanout(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange)
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue)
+    AMQP.Exchange.topic(chan, @exchange, durable: true)
+    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "error.*")
+    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -38,29 +37,26 @@ defmodule ElxLogger.ErrorConsumer do
   end
 
   def handle_info(
-        {:basic_deliver, payload, %{delivery_tag: _tag, redelivered: _redelivered}},
+        {:basic_deliver, payload,
+         %{routing_key: routing_key, delivery_tag: _tag, redelivered: _redelivered}},
         chan
       ) do
-    spawn(fn -> consume(payload) end)
+    spawn(fn -> consume(payload, routing_key) end)
     {:noreply, chan}
   end
 
-  defp consume(payload) do
+  defp consume(payload, action) do
     try do
-      if payload.file == "true" do
-        spawn(fn -> ElxLogger.File.file_factory(:error, payload.msg) end)
-      end
+      IO.puts("action: #{action} log: #{payload}")
 
-      if payload.db == "true" do
-        spawn(fn -> ElxLogger.Database.save_to_db(:error, payload.msg) end)
-      end
-
-      if payload.email == "true" do
-        spawn(fn -> ElxLogger.Mail.send_log(:error, payload.reciever, payload.msg) end)
+      cond do
+        action == "error.db" -> ElxLogger.make(:db, :error, payload)
+        action == "error.file" -> ElxLogger.make(:file, :error, payload)
+        action == "error.mail" -> ElxLogger.make(:mail, :error, payload)
       end
     rescue
       _ ->
-        IO.puts("ErrorConsumer did not completed at #{DateTime.utc_now()}")
+        IO.puts("Error Consumer did not completed")
     end
   end
 end

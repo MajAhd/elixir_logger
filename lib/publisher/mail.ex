@@ -2,13 +2,13 @@ defmodule ElxLogger.Mail do
   @moduledoc false
   import ElxLogger.MailmanConfig
 
-  def send_log(log_type, reciever, log) do
+  def send_log(log_type, log) do
     string_log_type = Atom.to_string(log_type)
 
     email = %Mailman.Email{
       subject: "Elixir Logger!",
-      from: "onedaric.coin@gmail.com",
-      to: [reciever],
+      from: Application.fetch_env!(:elx_logger, :username),
+      to: [Application.fetch_env!(:elx_logger, :logs_reciver)],
       data: [
         name: "ElxLogger #{string_log_type} Report"
       ],
