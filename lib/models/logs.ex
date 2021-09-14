@@ -7,13 +7,12 @@ defmodule ElxLogger.Logs do
     timestamps()
   end
 
-  def save_loge(log_type, log_message) do
+  def save_log(log_type, log_message) do
     new_log_query = %ElxLogger.Logs{
       log_type: log_type,
       log_message: log_message
     }
 
     ElxLogger.Repo.insert!(new_log_query)
-    :ok
   end
 end

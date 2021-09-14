@@ -6,7 +6,7 @@ defmodule ElxLogger.ErrorConsumer do
     GenServer.start_link(__MODULE__, arg, name: :elx_logger)
   end
 
-  @exchange "error_logs_exchange"
+  @exchange Application.fetch_env!(:elx_logger, :error_exchange)
   @queue "error"
   # @queue_error "#{@queue}_error"
 

@@ -6,7 +6,7 @@ defmodule ElxLogger.WarnConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange "warning_logs_exchange"
+  @exchange Application.fetch_env!(:elx_logger, :warning_exchange)
   @queue "warning"
   # @queue_error "#{@queue}_error"
 

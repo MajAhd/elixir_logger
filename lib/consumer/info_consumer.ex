@@ -6,7 +6,7 @@ defmodule ElxLogger.InfoConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange "info_logs_exchange"
+  @exchange Application.fetch_env!(:elx_logger, :info_exchange)
   @queue "info"
   # @queue_error "#{@queue}_error"
 

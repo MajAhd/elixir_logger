@@ -6,7 +6,7 @@ defmodule ElxLogger.TraceConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange "trace_logs_exchange"
+  @exchange Application.fetch_env!(:elx_logger, :trace_exchange)
   @queue "trace"
   # @queue_error "#{@queue}_error"
 
