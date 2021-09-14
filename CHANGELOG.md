@@ -4,7 +4,7 @@
 
 ## V0.1.0
 
-Hadle incomming logs via message brocker and save and publish them.
+Handle incoming logs via RabbitMQ and save and publish them.
 
 - Get log's via RabbitMq:
   - Debug
