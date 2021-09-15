@@ -1,6 +1,5 @@
 # This file contains the configuration for Credo and you are probably reading
-
-%{
+ %{
   configs: [
     %{
       name: "default",

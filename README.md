@@ -36,6 +36,20 @@ Simple and easy way to Manage Log's with RabbitMq
 - iex -S mix
 - mix run test
 
+## Example
+
+- email an error log :
+
+```elixir
+# error log : publish via  email
+{:ok, connection} = AMQP.Connection.open()
+{:ok, channel} = AMQP.Channel.open(connection)
+topic = "error.mail"
+AMQP.Exchange.topic(channel, @exchange, durable: true)
+AMQP.Basic.publish(channel, @exchange, topic, @message)
+AMQP.Connection.close(connection)
+```
+
 # Manual Test (via Nodejs)
 
 - clone [Node.Js with RabbitMQ](https://github.com/MajAhd/nodejs_rabbitmq)

@@ -1,4 +1,13 @@
 defmodule ElxLogger.WarnConsumer do
+  @moduledoc """
+   Warning Consumer
+    - create Warning Consumer via genserver
+    - Exchange type : Topic
+    - incomming topics:
+       - warning.db : save log to database
+       - warning.file : save log to file
+       - warning.mail : publish log via email
+  """
   use GenServer
   use AMQP
 
@@ -6,18 +15,18 @@ defmodule ElxLogger.WarnConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange Application.fetch_env!(:elx_logger, :warning_exchange)
+  @exchange Application.compile_env!(:elx_logger, :warning_exchange)
   @queue "warning"
   # @queue_error "#{@queue}_error"
 
   def init(_opts) do
-    {:ok, conn} = AMQP.Connection.open()
-    {:ok, chan} = AMQP.Channel.open(conn)
+    {:ok, conn} = Connection.open()
+    {:ok, chan} = Channel.open(conn)
 
-    AMQP.Queue.declare(chan, @queue, durable: true)
-    AMQP.Exchange.topic(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "warning.*")
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
+    Queue.declare(chan, @queue, durable: true)
+    Exchange.topic(chan, @exchange, durable: true)
+    Queue.bind(chan, @queue, @exchange, routing_key: "warning.*")
+    {:ok, _consumer_tag} = Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -46,17 +55,15 @@ defmodule ElxLogger.WarnConsumer do
   end
 
   defp consume(payload, action) do
-    try do
-      IO.puts("action: #{action} log: #{payload}")
+    IO.puts("action: #{action} log: #{payload}")
 
-      cond do
-        action == "warning.db" -> ElxLogger.make(:db, :warning, payload)
-        action == "warning.file" -> ElxLogger.make(:file, :warning, payload)
-        action == "warning.mail" -> ElxLogger.make(:mail, :warning, payload)
-      end
-    rescue
-      _ ->
-        IO.puts("Warning Consumer did not completed")
+    cond do
+      action == "warning.db" -> ElxLogger.make(:db, :warning, payload)
+      action == "warning.file" -> ElxLogger.make(:file, :warning, payload)
+      action == "warning.mail" -> ElxLogger.make(:mail, :warning, payload)
     end
+  rescue
+    _ ->
+      IO.puts("Warning Consumer did not completed")
   end
 end

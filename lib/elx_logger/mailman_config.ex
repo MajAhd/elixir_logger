@@ -1,4 +1,8 @@
 defmodule ElxLogger.MailmanConfig do
+  @moduledoc """
+    config Mailman context
+    - values should set in config/config.exs
+  """
   def context do
     %Mailman.Context{
       config: %Mailman.SmtpConfig{

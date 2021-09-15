@@ -1,5 +1,12 @@
 defmodule ElxLogger do
+  @moduledoc """
+    Trigger log actions :
+     file : save to file
+     db : save to db
+     mail : publish log via email
+  """
   use Application
+  alias ElxLogger.{Database, File, Mail}
 
   def start(_types, _args) do
     ElxLogger.Supervisor.start_link()
@@ -8,13 +15,13 @@ defmodule ElxLogger do
   def listen do
     receive do
       {:file, log_type, message} ->
-        spawn(fn -> ElxLogger.File.file_factory(log_type, message) end)
+        spawn(fn -> File.file_factory(log_type, message) end)
 
       {:db, log_type, message} ->
-        spawn(fn -> ElxLogger.Database.save_to_db(log_type, message) end)
+        spawn(fn -> Database.save_to_db(log_type, message) end)
 
       {:mail, log_type, message} ->
-        spawn(fn -> ElxLogger.Mail.send_log(log_type, message) end)
+        spawn(fn -> Mail.send_log(log_type, message) end)
     end
   end
 

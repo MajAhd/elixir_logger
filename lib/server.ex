@@ -1,4 +1,5 @@
 defmodule ElxLogger.Server do
+  @moduledoc false
   use GenServer
 
   def start_link(arg \\ []) do

@@ -1,4 +1,13 @@
 defmodule ElxLogger.InfoConsumer do
+  @moduledoc """
+    Info Consumer
+    - create Info Consumer via genserver
+    - Exchange type : Topic
+    - incomming topics:
+       - info.db : save log to database
+       - info.file : save log to file
+       - info.mail : publish log via email
+  """
   use GenServer
   use AMQP
 
@@ -6,18 +15,18 @@ defmodule ElxLogger.InfoConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange Application.fetch_env!(:elx_logger, :info_exchange)
+  @exchange Application.compile_env!(:elx_logger, :info_exchange)
   @queue "info"
   # @queue_error "#{@queue}_error"
 
   def init(_opts) do
-    {:ok, conn} = AMQP.Connection.open()
-    {:ok, chan} = AMQP.Channel.open(conn)
+    {:ok, conn} = Connection.open()
+    {:ok, chan} = Channel.open(conn)
 
-    AMQP.Queue.declare(chan, @queue, durable: true)
-    AMQP.Exchange.topic(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "info.*")
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
+    Queue.declare(chan, @queue, durable: true)
+    Exchange.topic(chan, @exchange, durable: true)
+    Queue.bind(chan, @queue, @exchange, routing_key: "info.*")
+    {:ok, _consumer_tag} = Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -46,17 +55,15 @@ defmodule ElxLogger.InfoConsumer do
   end
 
   defp consume(payload, action) do
-    try do
-      IO.puts("action: #{action} log: #{payload}")
+    IO.puts("action: #{action} log: #{payload}")
 
-      cond do
-        action == "info.db" -> ElxLogger.make(:db, :info, payload)
-        action == "info.file" -> ElxLogger.make(:file, :info, payload)
-        action == "info.mail" -> ElxLogger.make(:mail, :info, payload)
-      end
-    rescue
-      _ ->
-        IO.puts("Info Consumer did not completed")
+    cond do
+      action == "info.db" -> ElxLogger.make(:db, :info, payload)
+      action == "info.file" -> ElxLogger.make(:file, :info, payload)
+      action == "info.mail" -> ElxLogger.make(:mail, :info, payload)
     end
+  rescue
+    _ ->
+      IO.puts("Info Consumer did not completed")
   end
 end

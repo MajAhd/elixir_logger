@@ -1,4 +1,13 @@
 defmodule ElxLogger.DebugConsumer do
+  @moduledoc """
+    Debug Consumer
+    - create Debug Consumer via genserver
+    - Exchange type : Topic
+    - incomming topics:
+       - debug.db : save log to database
+       - debug.file : save log to file
+       - debug.mail : publish log via email
+  """
   use GenServer
   use AMQP
 
@@ -6,17 +15,17 @@ defmodule ElxLogger.DebugConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange Application.fetch_env!(:elx_logger, :debug_exchange)
+  @exchange Application.compile_env!(:elx_logger, :debug_exchange)
   @queue "debug"
 
   def init(_opts) do
-    {:ok, conn} = AMQP.Connection.open()
-    {:ok, chan} = AMQP.Channel.open(conn)
+    {:ok, conn} = Connection.open()
+    {:ok, chan} = Channel.open(conn)
 
-    AMQP.Queue.declare(chan, @queue, durable: true)
-    AMQP.Exchange.topic(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "debug.*")
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
+    Queue.declare(chan, @queue, durable: true)
+    Exchange.topic(chan, @exchange, durable: true)
+    Queue.bind(chan, @queue, @exchange, routing_key: "debug.*")
+    {:ok, _consumer_tag} = Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -45,17 +54,15 @@ defmodule ElxLogger.DebugConsumer do
   end
 
   defp consume(payload, action) do
-    try do
-      IO.puts("action: #{action} log: #{payload}")
+    IO.puts("action: #{action} log: #{payload}")
 
-      cond do
-        action == "debug.db" -> ElxLogger.make(:db, :debug, payload)
-        action == "debug.file" -> ElxLogger.make(:file, :debug, payload)
-        action == "debug.mail" -> ElxLogger.make(:mail, :debug, payload)
-      end
-    rescue
-      _ ->
-        IO.puts("Debug Consumer did not completed")
+    cond do
+      action == "debug.db" -> ElxLogger.make(:db, :debug, payload)
+      action == "debug.file" -> ElxLogger.make(:file, :debug, payload)
+      action == "debug.mail" -> ElxLogger.make(:mail, :debug, payload)
     end
+  rescue
+    _ ->
+      IO.puts("Debug Consumer did not completed")
   end
 end

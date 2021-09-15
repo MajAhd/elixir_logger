@@ -1,4 +1,7 @@
 defmodule ElxLogger.Supervisor do
+  @moduledoc """
+    run and keep application stat via OTP/Genserver
+  """
   use Supervisor
   use AMQP
 

@@ -1,4 +1,13 @@
 defmodule ElxLogger.TraceConsumer do
+  @moduledoc """
+    Trace Consumer
+    - create Trace Consumer via genserver
+    - Exchange type : Topic
+    - incomming topics:
+       - trace.db : save log to database
+       - trace.file : save log to file
+       - trace.mail : publish log via email
+  """
   use GenServer
   use AMQP
 
@@ -6,18 +15,18 @@ defmodule ElxLogger.TraceConsumer do
     GenServer.start_link(__MODULE__, arg, [])
   end
 
-  @exchange Application.fetch_env!(:elx_logger, :trace_exchange)
+  @exchange Application.compile_env!(:elx_logger, :trace_exchange)
   @queue "trace"
   # @queue_error "#{@queue}_error"
 
   def init(_opts) do
-    {:ok, conn} = AMQP.Connection.open()
-    {:ok, chan} = AMQP.Channel.open(conn)
+    {:ok, conn} = Connection.open()
+    {:ok, chan} = Channel.open(conn)
 
-    AMQP.Queue.declare(chan, @queue, durable: true)
-    AMQP.Exchange.topic(chan, @exchange, durable: true)
-    AMQP.Queue.bind(chan, @queue, @exchange, routing_key: "trace.*")
-    {:ok, _consumer_tag} = AMQP.Basic.consume(chan, @queue, nil, no_ack: true)
+    Queue.declare(chan, @queue, durable: true)
+    Exchange.topic(chan, @exchange, durable: true)
+    Queue.bind(chan, @queue, @exchange, routing_key: "trace.*")
+    {:ok, _consumer_tag} = Basic.consume(chan, @queue, nil, no_ack: true)
     {:ok, chan}
   end
 
@@ -46,17 +55,15 @@ defmodule ElxLogger.TraceConsumer do
   end
 
   defp consume(payload, action) do
-    try do
-      IO.puts("action: #{action} log: #{payload}")
+    IO.puts("action: #{action} log: #{payload}")
 
-      cond do
-        action == "trace.db" -> ElxLogger.make(:db, :trace, payload)
-        action == "trace.file" -> ElxLogger.make(:file, :trace, payload)
-        action == "trace.mail" -> ElxLogger.make(:mail, :trace, payload)
-      end
-    rescue
-      _ ->
-        IO.puts("Trace Consumer did not completed")
+    cond do
+      action == "trace.db" -> ElxLogger.make(:db, :trace, payload)
+      action == "trace.file" -> ElxLogger.make(:file, :trace, payload)
+      action == "trace.mail" -> ElxLogger.make(:mail, :trace, payload)
     end
+  rescue
+    _ ->
+      IO.puts("Trace Consumer did not completed")
   end
 end
